@@ -5,24 +5,37 @@ USE album_ratings;
 CREATE TABLE artists(
 artist_id INT AUTO_INCREMENT PRIMARY KEY,
 artist_name VARCHAR(255) NOT NULL,
-previous_names VARCHAR(255),
 country VARCHAR (100) NOT NULL,
 city VARCHAR (100),
 active_from YEAR,
-still_active VARCHAR (10)
-artist_type VARCHAR(50)
+still_active BOOLEAN
 );
 
-CREATE TABLE writers(
-writer_id INT AUTO_INCREMENT PRIMARY KEY,
-writer_name VARCHAR(255) NOT NULL,
-country VARCHAR (100) NOT NULL
+CREATE TABLE artist_aliases (
+alias_artist_id INT NOT NULL,
+primary_artist_id INT NOT NULL,
+PRIMARY KEY (alias_artist_id),
+FOREIGN KEY (alias_artist_id) REFERENCES artists(artist_id),
+FOREIGN KEY (primary_artist_id) REFERENCES artists(artist_id)
 );
 
-CREATE TABLE producers(
-producer_id INT AUTO_INCREMENT PRIMARY KEY,
-producer_name VARCHAR(255) NOT NULL,
-country VARCHAR (100) NOT NULL
+CREATE TABLE artist_previous_names (
+name_id INT AUTO_INCREMENT NOT NULL,
+previous_name VARCHAR (255) NOT NULL,
+artist_id INT NOT NULL,
+PRIMARY KEY (name_id, artist_id),
+FOREIGN KEY (artist_id) REFERENCES artists(artist_id)
+);
+
+CREATE TABLE band_members(
+member_id INT AUTO_INCREMENT,
+band_id INT NOT NULL,
+role VARCHAR(50),
+active_from YEAR,
+departure YEAR,
+PRIMARY KEY (member_id, band_id),
+FOREIGN KEY (member_id) REFERENCES artists(artist_id),
+FOREIGN KEY (band_id) REFERENCES artists(artist_id)
 );
 
 CREATE TABLE record_labels(
@@ -35,10 +48,10 @@ FOREIGN KEY (parent_label_id) REFERENCES record_labels(label_id)
 CREATE TABLE albums(
 album_id INT AUTO_INCREMENT PRIMARY KEY,
 album_name VARCHAR(255) NOT NULL,
-release_date DATE,
 artist_id INT NOT NULL,
+release_date DATE,
 album_ep VARCHAR(10) NOT NULL,
-record_label INT (255),
+record_label INT,
 CONSTRAINT fk_artist_id
 FOREIGN KEY (artist_id) REFERENCES artists(artist_id),
 FOREIGN KEY (record_label) REFERENCES record_labels(label_id)
@@ -64,36 +77,20 @@ FOREIGN KEY (song_id) REFERENCES songs(song_id),
 FOREIGN KEY (artist_id) REFERENCES artists(artist_id)
 );
 
-CREATE TABLE song_writers(
-song_id INT NOT NULL,
-writer_id INT NOT NULL,
-PRIMARY KEY (song_id, writer_id),
-FOREIGN KEY (song_id) REFERENCES songs(song_id),
-FOREIGN KEY (writer_id) REFERENCES writers(writer_id)
-);
-
-CREATE TABLE song_producers(
-song_id INT NOT NULL,
-producer_id INT NOT NULL,
-PRIMARY KEY (song_id, producer_id),
-FOREIGN KEY (song_id) REFERENCES songs(song_id),
-FOREIGN KEY (producer_id) REFERENCES producers(producer_id)
-);
-
 CREATE TABLE ratings(
-song_id INT,
-total_score FLOAT AS (
+song_id INT PRIMARY KEY,
+total_score DECIMAL AS (
 	(lyrics + production + vocals + structure_and_length +
 	concept_execution + catchiness_and_memorability + emotional_impact + replay_value) / 8
     ) STORED,
-lyrics FLOAT (3,2),
-production FLOAT (3,1),
-vocals FLOAT (3,1),
-structure_and_length FLOAT (3,1),
-concept_execution FLOAT (3,1),
-catchiness_and_memorability FLOAT (3,1),
-emotional_impact FLOAT (3,1),
-replay_value FLOAT (3,1),
+lyrics DECIMAL (3,2),
+production DECIMAL (3,1),
+vocals DECIMAL (3,1),
+structure_and_length DECIMAL (3,1),
+concept_execution DECIMAL (3,1),
+catchiness_and_memorability DECIMAL (3,1),
+emotional_impact DECIMAL (3,1),
+replay_value DECIMAL (3,1),
 CONSTRAINT fk_song_id
 FOREIGN KEY (song_id) REFERENCES songs(song_id)
 );
