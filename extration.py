@@ -1,5 +1,4 @@
 import csv
-import pandas as pd
 import math
 
 
@@ -17,28 +16,79 @@ def get_csv_title(album_name):
 
 
 def get_artist(album_name):
-    album_artist = input(f"Who is {album_name} by?: ")
-    country = input(f"What country is {album_artist} from? ").title
-    city = input(f"What city is {album_artist} from? ").title
-    active_from = int(
-        input(f"What year did {album_artist} become active from? "))
-    still_active = bool(input(f"Is {album_artist} still active? "))
-    return album_artist, country, city, active_from, still_active
+    artist_data = {}
+    artist_data["artist_name"] = input(f"Who is {album_name} by?: ")
+    artist_data["country"] = input(
+        f"What country is {artist_data['artist_name']} from? ").title()
+    artist_data["city"] = input(
+        f"Which city? ").title()
+    artist_data["active_from"] = int(
+        input(f"What year did {artist_data['artist_name']} become active from? "))
+    artist_data["still_active"] = (
+        input(
+            f"Is {artist_data['artist_name']} still active? (yes/no): ").lower() == "yes"
+    )
+    return artist_data
 
 
-def prev_names(artist):
-    question = input(f"Has {artist} released music under any other name? ")
-    if question.lower() == "no":
-        return False
-    else:
-        prev_names = []
+def artist_other_names(artist):
+    name_data = {
+        "artist_name": artist,
+        "rebrands": [],
+        "aliases": []
+    }
+
+    # REBRANDS
+    if input(f"Has {artist} changed their name over time? (yes/no): ").lower() == "yes":
         while True:
-            prev_name_q = input("What is a previous name of this artist? ")
-            prev_names.append(prev_name_q)
-            question2 = input(
-                f"Are there any other names {artist} has released music under? ")
-            if question2.lower() == "no":
-                return prev_names
+            name_data["rebrands"].append(input("Enter name used: "))
+            if input("More rebrands? (yes/no): ").lower() == "no":
+                break
+
+    # ALIASES
+    if input(f"Does {artist} use any aliases? (yes/no): ").lower() == "yes":
+        while True:
+            name_data["aliases"].append(input("Enter alias: "))
+            if input("More aliases? (yes/no): ").lower() == "no":
+                break
+
+    return name_data
+
+
+def band(artist):
+    if input(f"Is {artist} a solo artist? (yes/no): ").lower() == "yes":
+        return []
+    else:
+        band = []
+        while True:
+            member = {"band_name": artist}
+            member["member_name"] = input(
+                f"Name a member of {artist}: ").title()
+            member["role"] = input(
+                f"What is {member['member_name']}'s primary role in {artist}?: ").lower()
+            member["active_from"] = int(
+                input(f"What year did {member['member_name']} join {artist}?: "))
+            if input(f"Is {member['member_name']} still part of {artist}? (yes/no): ").lower() == "yes":
+                member["departure"] = ""
+            else:
+                member["departure"] = int(
+                    input(f"What year did {member['member_name']} leave {artist}?: "))
+            band.append(member)
+            if input(f"Any more members of {artist}? (yes/no): ").lower() == "no":
+                break
+    return band
+
+
+def get_album_info(album_name, artist_name):
+    album_info = {"album_name": album_name}
+    album_info["artist_name"] = artist_name
+    album_info["release_date"] = input(f"When was {album_name} released in? Please give answer in the format MM-YYYY":)
+    if input("is this an album or ep?: ").lower == "album":
+        album_info["album_ep"] = "Album"
+    else:
+        album_info["album_ep"] = "EP"
+    album_info["record_labels"] = input(
+        f"What record label released {album_name}")
 
 
 def get_csv_artist(album_artist):
@@ -67,7 +117,9 @@ def get_tracklist():
 
 album_name = get_album_name()
 artist_name = get_artist(album_name)
-print(prev_names(artist_name))
+print(artist_name)
+print(artist_other_names(artist_name["artist_name"]))
+print(band(artist_name["artist_name"]))
 album_year = release_year(album_name)
 tracklist = get_tracklist()
 
